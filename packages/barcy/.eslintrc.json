@@ -9,5 +9,8 @@
 		"neon/jsx-a11y",
 		"neon/next",
 		"neon/prettier"
-	]
+	],
+	"rules": {
+		"react/prop-types": 0
+	}
 }

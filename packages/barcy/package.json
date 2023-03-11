@@ -1,13 +1,19 @@
 {
 	"name": "barcy",
-	"version": "0.1.0",
-	"description": "",
+	"version": "0.0.1",
+	"description": "A Modern React Component for reading USB Barcode Scanners",
 	"type": "module",
-	"keywords": [],
+	"keywords": ["react", "barcode", "react barcode", "scanner"],
 	"author": "Carter <me@fyko.net>",
 	"license": "MIT",
+	"files": ["dist"],
 	"types": "dist/index.d.ts",
 	"main": "dist/index.jsx",
+	"homepage": "https://github.com/Fyko/barcy",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Fyko/barcy"
+	},
 	"scripts": {
 		"build": "tsc",
 		"lint": "prettier --check . && eslint src --ext mjs,js,ts,tsx --format=pretty",

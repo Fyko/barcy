@@ -117,9 +117,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			setStringWriting("");
 		}
 
-		if (!scanButtonCounter) {
-			setScanButtonCounter(1);
-		}
+		if (!scanButtonCounter) setScanButtonCounter(1);
 
 		// If all condition are good (length, time...), call the callback and re-initialize the plugin for next scanning
 		// Else, just re-initialize
@@ -127,9 +125,9 @@ function Barcy(_props: Partial<BarcyProps>) {
 			stringWriting.length >= props.minLength &&
 			lastCharTime - firstCharTime < stringWriting.length * props.avgTimeByChar
 		) {
-			if (props.onScanButtonLongPressed && scanButtonCounter > props.scanButtonLongPressThreshold)
-				props.onScanButtonLongPressed(stringWriting, scanButtonCounter);
-			else if (props.onScan) props.onScan(stringWriting, scanButtonCounter);
+			if (scanButtonCounter > props.scanButtonLongPressThreshold)
+				props.onScanButtonLongPressed?.(stringWriting, scanButtonCounter);
+			else props.onScan?.(stringWriting, scanButtonCounter);
 
 			initScannerDetection();
 			return true;
@@ -142,7 +140,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			errorMsg = `Average key character time should be less or equal ${props.avgTimeByChar}ms`;
 		}
 
-		if (props.onError) props.onError(stringWriting, errorMsg);
+		props.onError?.(stringWriting, errorMsg);
 
 		initScannerDetection();
 		return false;
@@ -159,7 +157,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			event.stopImmediatePropagation();
 		}
 
-		if (props.onKeyDetect) props.onKeyDetect(event);
+		props.onKeyDetect?.(event);
 
 		if (props.stopPropagation) event.stopImmediatePropagation();
 		if (props.preventDefault) event.preventDefault();
@@ -191,7 +189,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			setTestTimer(setTimeout(scannerDetectionTest, props.timeBeforeScanTest));
 		}
 
-		if (props.onReceive) props.onReceive(event);
+		props.onReceive?.(event);
 	};
 
 	useEffect(() => {
