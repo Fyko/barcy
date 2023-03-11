@@ -1,0 +1,28 @@
+{
+	"name": "barcy",
+	"version": "0.1.0",
+	"description": "",
+	"type": "module",
+	"keywords": [],
+	"author": "Carter <me@fyko.net>",
+	"license": "MIT",
+	"types": "dist/index.d.ts",
+	"main": "dist/index.jsx",
+	"scripts": {
+		"build": "tsc",
+		"lint": "prettier --check . && eslint src --ext mjs,js,ts,tsx --format=pretty",
+		"format": "prettier --write . && eslint src --ext mjs,js,ts,tsx --fix --format=pretty"
+	},
+	"dependencies": {
+		"react": "^18.2.0"
+	},
+	"devDependencies": {
+		"@testing-library/react": "^13.4.0",
+		"@types/node": "^18.11.18",
+		"eslint": "^8.31.0",
+		"eslint-config-neon": "^0.1.40",
+		"eslint-formatter-pretty": "^4.1.0",
+		"prettier": "^2.8.2",
+		"typescript": "^4.9.4"
+	}
+}

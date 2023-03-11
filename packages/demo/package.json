@@ -1,0 +1,22 @@
+{
+	"name": "@barcy/demo",
+	"version": "0.1.0",
+	"license": "MIT",
+	"scripts": {
+		"start": "parcel serve index.html",
+		"build": "parcel build index.html"
+	},
+	"dependencies": {
+		"barcy": "workspace:^",
+		"react": "^18.2.0",
+		"react-app-polyfill": "^3.0.0",
+		"react-dom": "^18.2.0",
+		"scheduler": "^0.23.0"
+	},
+	"devDependencies": {
+		"@types/react": "^18",
+		"@types/react-dom": "^18",
+		"parcel": "^2.8.3",
+		"typescript": "^4.9.5"
+	}
+}
