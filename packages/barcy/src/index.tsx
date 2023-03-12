@@ -17,23 +17,23 @@ type BarcyProps = {
 	/**
 	 * Callback after detection of a unsuccessfull scanning (scanned string in parameter)
 	 */
-	onError?(scannedString: string, error: string): void;
+	onError?: (scannedString: string, error: string) => void;
 	/**
 	 * Callback after detecting a keyDown (key char in parameter) - in contrast to onReceive, this fires for non-character keys like tab, arrows, etc. too!
 	 */
-	onKeyDetect?(event: KeyboardEvent): void;
+	onKeyDetect?: (event: KeyboardEvent) => void;
 	/**
 	 * Callback after receiving and processing a char (scanned char in parameter)
 	 */
-	onReceive?(event: KeyboardEvent): void;
+	onReceive?: (event: KeyboardEvent) => void;
 	/**
 	 * Callback after detection of a successfull scanning (scanned string in parameter)
 	 */
-	onScan?(scannedString: string, count: number): void;
+	onScan?: (scannedString: string, count: number) => void;
 	/**
 	 * Callback after detection of a successfull scan while the scan button was pressed and held down
 	 */
-	onScanButtonLongPressed?(scannedString: string, count: number): void;
+	onScanButtonLongPressed?: (scannedString: string, count: number) => void;
 	/**
 	 * Prevent default action on keypress event
 	 */
@@ -64,7 +64,7 @@ type BarcyProps = {
 	timeBeforeScanTest: number;
 };
 
-const defaultProps: Partial<BarcyProps> = {
+const defaultProps = {
 	avgTimeByChar: 30,
 	endChar: [9, 13],
 	minLength: 6,
@@ -72,7 +72,7 @@ const defaultProps: Partial<BarcyProps> = {
 	stopPropagation: false,
 	preventDefault: false,
 	timeBeforeScanTest: 100,
-};
+} as const;
 
 function isContentEditable(element: HTMLElement) {
 	if (typeof element.getAttribute !== "function") {
@@ -95,110 +95,137 @@ function isInput(element: HTMLElement) {
 
 function Barcy(_props: Partial<BarcyProps>) {
 	// merge props with default props
-	const props = { ...defaultProps, ..._props } as BarcyProps;
+	const {
+		avgTimeByChar,
+		endChar,
+		minLength,
+		onError,
+		onKeyDetect,
+		onReceive,
+		onScan,
+		onScanButtonLongPressed,
+		preventDefault,
+		scanButtonKeyCode,
+		scanButtonLongPressThreshold,
+		startChar,
+		stopPropagation,
+		timeBeforeScanTest,
+	} = { ...defaultProps, ..._props } as BarcyProps;
 
 	const [firstCharTime, setFirstCharTime] = React.useState(0);
 	const [lastCharTime, setLastCharTime] = React.useState(0);
 	const [stringWriting, setStringWriting] = React.useState("");
 	const [callIsScanner, setCallIsScanner] = React.useState(false);
-	const [testTimer, setTestTimer] = React.useState<NodeJS.Timeout | undefined>(undefined);
+	const [testTimer, setTestTimer] = React.useState<number | undefined>(undefined);
 	const [scanButtonCounter, setScanButtonCounter] = React.useState(0);
 
-	const initScannerDetection = () => {
-		setFirstCharTime(0);
-		setStringWriting("");
-		setScanButtonCounter(0);
-	};
-
-	const scannerDetectionTest = (str?: string) => {
-		if (str) {
+	useEffect(() => {
+		const initScannerDetection = () => {
 			setFirstCharTime(0);
-			setLastCharTime(0);
 			setStringWriting("");
-		}
+			setScanButtonCounter(0);
+		};
 
-		if (!scanButtonCounter) setScanButtonCounter(1);
-
-		// If all condition are good (length, time...), call the callback and re-initialize the plugin for next scanning
-		// Else, just re-initialize
-		if (
-			stringWriting.length >= props.minLength &&
-			lastCharTime - firstCharTime < stringWriting.length * props.avgTimeByChar
-		) {
-			if (scanButtonCounter > props.scanButtonLongPressThreshold)
-				props.onScanButtonLongPressed?.(stringWriting, scanButtonCounter);
-			else props.onScan?.(stringWriting, scanButtonCounter);
-
-			initScannerDetection();
-			return true;
-		}
-
-		let errorMsg = "";
-		if (stringWriting.length < props.minLength) {
-			errorMsg = `String length should be greater or equal ${props.minLength}`;
-		} else if (lastCharTime - firstCharTime > stringWriting.length * props.avgTimeByChar) {
-			errorMsg = `Average key character time should be less or equal ${props.avgTimeByChar}ms`;
-		}
-
-		props.onError?.(stringWriting, errorMsg);
-
-		initScannerDetection();
-		return false;
-	};
-
-	const handleKeyPress = (event: KeyboardEvent) => {
-		if (event.target instanceof HTMLElement && isInput(event.target)) {
-			return;
-		}
-
-		if (props.scanButtonKeyCode && event.which === props.scanButtonKeyCode) {
-			setScanButtonCounter(scanButtonCounter + 1);
-			event.preventDefault();
-			event.stopImmediatePropagation();
-		}
-
-		props.onKeyDetect?.(event);
-
-		if (props.stopPropagation) event.stopImmediatePropagation();
-		if (props.preventDefault) event.preventDefault();
-
-		if (firstCharTime && props.endChar?.indexOf(event.which) !== -1) {
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			setCallIsScanner(true);
-		} else if (!firstCharTime && props.startChar?.indexOf(event.which) !== -1) {
-			event.preventDefault();
-			event.stopImmediatePropagation();
-			setCallIsScanner(false);
-		} else {
-			if (typeof event.which !== "undefined") {
-				setStringWriting(`${stringWriting}${String.fromCodePoint(event.which)}`);
+		const scannerDetectionTest = (str?: string) => {
+			if (str) {
+				setFirstCharTime(0);
+				setLastCharTime(0);
+				setStringWriting("");
 			}
 
-			setCallIsScanner(false);
-		}
+			if (!scanButtonCounter) setScanButtonCounter(1);
 
-		if (!firstCharTime) setFirstCharTime(Date.now());
-		setLastCharTime(Date.now());
+			// If all condition are good (length, time...), call the callback and re-initialize the plugin for next scanning
+			// Else, just re-initialize
+			if (stringWriting.length >= minLength && lastCharTime - firstCharTime < stringWriting.length * avgTimeByChar) {
+				if (scanButtonCounter > scanButtonLongPressThreshold)
+					onScanButtonLongPressed?.(stringWriting, scanButtonCounter);
+				else onScan?.(stringWriting, scanButtonCounter);
 
-		if (testTimer) clearTimeout(testTimer);
-		if (callIsScanner) {
-			scannerDetectionTest();
-			setTestTimer(undefined);
-		} else {
-			setTestTimer(setTimeout(scannerDetectionTest, props.timeBeforeScanTest));
-		}
+				initScannerDetection();
+				return true;
+			}
 
-		props.onReceive?.(event);
-	};
+			let errorMsg = "";
+			if (stringWriting.length < minLength) {
+				errorMsg = `String length should be greater or equal ${minLength}`;
+			} else if (lastCharTime - firstCharTime > stringWriting.length * avgTimeByChar) {
+				errorMsg = `Average key character time should be less or equal ${avgTimeByChar}ms`;
+			}
 
-	useEffect(() => {
+			onError?.(stringWriting, errorMsg);
+
+			initScannerDetection();
+			return false;
+		};
+
+		const handleKeyPress = (event: KeyboardEvent) => {
+			if (event.target instanceof HTMLElement && isInput(event.target)) {
+				return;
+			}
+
+			if (scanButtonKeyCode && event.charCode === scanButtonKeyCode) {
+				setScanButtonCounter(scanButtonCounter + 1);
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+
+			onKeyDetect?.(event);
+
+			if (stopPropagation) event.stopImmediatePropagation();
+			if (preventDefault) event.preventDefault();
+
+			if (firstCharTime && endChar.includes(event.charCode)) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				setCallIsScanner(true);
+			} else if (!firstCharTime && startChar?.includes(event.charCode)) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				setCallIsScanner(false);
+			} else {
+				if (typeof event.charCode !== "undefined") {
+					setStringWriting(`${stringWriting}${String.fromCodePoint(event.charCode)}`);
+				}
+
+				setCallIsScanner(false);
+			}
+
+			if (!firstCharTime) setFirstCharTime(Date.now());
+			setLastCharTime(Date.now());
+
+			if (testTimer) window.clearTimeout(testTimer);
+			if (callIsScanner) {
+				scannerDetectionTest();
+				setTestTimer(undefined);
+			} else {
+				setTestTimer(window.setTimeout(scannerDetectionTest, timeBeforeScanTest));
+			}
+
+			onReceive?.(event);
+		};
+
 		window.addEventListener("keypress", handleKeyPress);
 
 		return () => {
 			window.removeEventListener("keypress", handleKeyPress);
 		};
-	}, [handleKeyPress]);
+	}, [
+		avgTimeByChar, lastCharTime, minLength, onError, onScan, onScanButtonLongPressed, scanButtonLongPressThreshold,
+		callIsScanner,
+		endChar,
+		firstCharTime,
+		onKeyDetect,
+		onReceive,
+		preventDefault,
+		scanButtonCounter,
+		scanButtonKeyCode,
+		startChar,
+		stopPropagation,
+		stringWriting,
+		testTimer,
+		timeBeforeScanTest,
+	]);
 
 	return null;
 }

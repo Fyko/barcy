@@ -8,7 +8,7 @@ const App = () => {
 
   return (
     <>
-      <Barcy onScan={(str) => setValue(str)} />
+      <Barcy onScan={(str) => setValue(str)} onKeyDetect={console.log} />
       <p>Scanned value: {value}</p>
     </>
   );

@@ -3,10 +3,17 @@
 	"version": "0.0.1",
 	"description": "A Modern React Component for reading USB Barcode Scanners",
 	"type": "module",
-	"keywords": ["react", "barcode", "react barcode", "scanner"],
+	"keywords": [
+		"react",
+		"barcode",
+		"react barcode",
+		"scanner"
+	],
 	"author": "Carter <me@fyko.net>",
 	"license": "MIT",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"types": "dist/index.d.ts",
 	"main": "dist/index.jsx",
 	"homepage": "https://github.com/Fyko/barcy",
