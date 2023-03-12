@@ -232,9 +232,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@barcy/demo@workspace:packages/demo":
+"@barcy/demo@workspace:apps/demo":
   version: 0.0.0-use.local
-  resolution: "@barcy/demo@workspace:packages/demo"
+  resolution: "@barcy/demo@workspace:apps/demo"
   dependencies:
     "@types/react": ^18
     "@types/react-dom": ^18
@@ -256,9 +256,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@barcy/website@workspace:packages/website":
+"@barcy/website@workspace:apps/website":
   version: 0.0.0-use.local
-  resolution: "@barcy/website@workspace:packages/website"
+  resolution: "@barcy/website@workspace:apps/website"
   dependencies:
     "@types/node": ^18
     "@types/react": ^18
@@ -441,6 +441,27 @@ __metadata:
     "@jridgewell/resolve-uri": 3.1.0
     "@jridgewell/sourcemap-codec": 1.4.14
   checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
+  languageName: node
+  linkType: hard
+
+"@legendapp/state@npm:^0.23.4":
+  version: 0.23.4
+  resolution: "@legendapp/state@npm:0.23.4"
+  peerDependencies:
+    "@tanstack/react-query": ^4.14.6
+    react: ">=16.8"
+    react-native: ">=0.61"
+    react-native-mmkv: ^2
+  peerDependenciesMeta:
+    "@tanstack/react-query":
+      optional: true
+    react:
+      optional: true
+    react-native:
+      optional: true
+    react-native-mmkv:
+      optional: true
+  checksum: 2cb08cbd41073c235e622f445de1eab1d7bb81af34f0da307be3c89bb395920d257bb7e658810080949259ae8b8ab63fe3dcb0ba764fe17d9028f2f2f4feea86
   languageName: node
   linkType: hard
 
@@ -2159,6 +2180,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "barcy@workspace:packages/barcy"
   dependencies:
+    "@legendapp/state": ^0.23.4
     "@testing-library/react": ^13.4.0
     "@types/node": ^18.11.18
     eslint: ^8.31.0

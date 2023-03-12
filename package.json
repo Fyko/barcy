@@ -1,7 +1,8 @@
 {
   "name": "@barcy/root",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "dev": "yarn build && yarn workspace @barcy/website dev",

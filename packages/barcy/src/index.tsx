@@ -1,5 +1,6 @@
 // TODO: handle iframe
-import React, { useEffect } from "react";
+import { observable } from "@legendapp/state";
+import { useEffect } from "react";
 
 type BarcyProps = {
 	/**
@@ -112,48 +113,50 @@ function Barcy(_props: Partial<BarcyProps>) {
 		timeBeforeScanTest,
 	} = { ...defaultProps, ..._props } as BarcyProps;
 
-	const [firstCharTime, setFirstCharTime] = React.useState(0);
-	const [lastCharTime, setLastCharTime] = React.useState(0);
-	const [stringWriting, setStringWriting] = React.useState("");
-	const [callIsScanner, setCallIsScanner] = React.useState(false);
-	const [testTimer, setTestTimer] = React.useState<number | undefined>(undefined);
-	const [scanButtonCounter, setScanButtonCounter] = React.useState(0);
+	const state = observable({
+		firstCharTime: 0,
+		lastCharTime: 0,
+		stringWriting: "",
+		callIsScanner: false,
+		testTimer: undefined as number | undefined,
+		scanButtonCounter: 0,
+	});
 
 	useEffect(() => {
 		const initScannerDetection = () => {
-			setFirstCharTime(0);
-			setStringWriting("");
-			setScanButtonCounter(0);
+			state.firstCharTime.set(0);
+			state.stringWriting.set("");
+			state.scanButtonCounter.set(0);
 		};
 
 		const scannerDetectionTest = (str?: string) => {
 			if (str) {
-				setFirstCharTime(0);
-				setLastCharTime(0);
-				setStringWriting("");
+				state.stringWriting.set(str);
+				state.firstCharTime.set(0);
+				state.lastCharTime.set(0);
 			}
 
-			if (!scanButtonCounter) setScanButtonCounter(1);
+			if (!state.scanButtonCounter.get()) state.scanButtonCounter.set(1);
 
 			// If all condition are good (length, time...), call the callback and re-initialize the plugin for next scanning
 			// Else, just re-initialize
-			if (stringWriting.length >= minLength && lastCharTime - firstCharTime < stringWriting.length * avgTimeByChar) {
-				if (scanButtonCounter > scanButtonLongPressThreshold)
-					onScanButtonLongPressed?.(stringWriting, scanButtonCounter);
-				else onScan?.(stringWriting, scanButtonCounter);
+			if (state.stringWriting.get().length >= minLength && state.lastCharTime.get() - state.firstCharTime.get() < state.stringWriting.get().length * avgTimeByChar) {
+				if (state.scanButtonCounter.get() > scanButtonLongPressThreshold)
+					onScanButtonLongPressed?.(state.stringWriting.get(), state.scanButtonCounter.get());
+				else onScan?.(state.stringWriting.get(), state.scanButtonCounter.get());
 
 				initScannerDetection();
 				return true;
 			}
 
 			let errorMsg = "";
-			if (stringWriting.length < minLength) {
+			if (state.stringWriting.get().length < minLength) {
 				errorMsg = `String length should be greater or equal ${minLength}`;
-			} else if (lastCharTime - firstCharTime > stringWriting.length * avgTimeByChar) {
+			} else if (state.lastCharTime.get() - state.firstCharTime.get() > state.stringWriting.get().length * avgTimeByChar) {
 				errorMsg = `Average key character time should be less or equal ${avgTimeByChar}ms`;
 			}
 
-			onError?.(stringWriting, errorMsg);
+			onError?.(state.stringWriting.get(), errorMsg);
 
 			initScannerDetection();
 			return false;
@@ -165,7 +168,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			}
 
 			if (scanButtonKeyCode && event.charCode === scanButtonKeyCode) {
-				setScanButtonCounter(scanButtonCounter + 1);
+				state.scanButtonCounter.set(state.scanButtonCounter.get() + 1);
 				event.preventDefault();
 				event.stopImmediatePropagation();
 			}
@@ -175,31 +178,31 @@ function Barcy(_props: Partial<BarcyProps>) {
 			if (stopPropagation) event.stopImmediatePropagation();
 			if (preventDefault) event.preventDefault();
 
-			if (firstCharTime && endChar.includes(event.charCode)) {
+			if (state.firstCharTime.get() && endChar.includes(event.charCode)) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-				setCallIsScanner(true);
-			} else if (!firstCharTime && startChar?.includes(event.charCode)) {
+				state.callIsScanner.set(true);
+			} else if (!state.firstCharTime.get() && startChar?.includes(event.charCode)) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
-				setCallIsScanner(false);
+				state.callIsScanner.set(false);
 			} else {
 				if (typeof event.charCode !== "undefined") {
-					setStringWriting(`${stringWriting}${String.fromCodePoint(event.charCode)}`);
+					state.stringWriting.set(`${state.stringWriting.get()}${String.fromCodePoint(event.charCode)}`);
 				}
 
-				setCallIsScanner(false);
+				state.callIsScanner.set(false);
 			}
 
-			if (!firstCharTime) setFirstCharTime(Date.now());
-			setLastCharTime(Date.now());
+			if (!state.firstCharTime.get()) state.firstCharTime.set(Date.now());
+			state.lastCharTime.set(Date.now());
 
-			if (testTimer) window.clearTimeout(testTimer);
-			if (callIsScanner) {
+			if (state.testTimer.get()) window.clearTimeout(state.testTimer.get());
+			if (state.callIsScanner.get()) {
 				scannerDetectionTest();
-				setTestTimer(undefined);
+				state.testTimer.set(undefined);
 			} else {
-				setTestTimer(window.setTimeout(scannerDetectionTest, timeBeforeScanTest));
+				state.testTimer.set(window.setTimeout(scannerDetectionTest, timeBeforeScanTest));
 			}
 
 			onReceive?.(event);
@@ -212,25 +215,20 @@ function Barcy(_props: Partial<BarcyProps>) {
 		};
 	}, [
 		avgTimeByChar,
-		lastCharTime,
 		minLength,
 		onError,
 		onScan,
 		onScanButtonLongPressed,
 		scanButtonLongPressThreshold,
-		callIsScanner,
 		endChar,
-		firstCharTime,
 		onKeyDetect,
 		onReceive,
 		preventDefault,
-		scanButtonCounter,
 		scanButtonKeyCode,
 		startChar,
 		stopPropagation,
-		stringWriting,
-		testTimer,
 		timeBeforeScanTest,
+		state
 	]);
 
 	return null;
