@@ -211,7 +211,13 @@ function Barcy(_props: Partial<BarcyProps>) {
 			window.removeEventListener("keypress", handleKeyPress);
 		};
 	}, [
-		avgTimeByChar, lastCharTime, minLength, onError, onScan, onScanButtonLongPressed, scanButtonLongPressThreshold,
+		avgTimeByChar,
+		lastCharTime,
+		minLength,
+		onError,
+		onScan,
+		onScanButtonLongPressed,
+		scanButtonLongPressThreshold,
 		callIsScanner,
 		endChar,
 		firstCharTime,

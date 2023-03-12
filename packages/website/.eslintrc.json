@@ -6,10 +6,11 @@
 		"neon/node",
 		"neon/typescript",
 		"neon/react",
-		"neon/prettier"
+		"neon/prettier",
+		"neon/next"
 	],
 	"rules": {
 		"@typescript-eslint/method-signature-style": 0
 	},
-	"ignorePatterns": ["dist"]
+	"ignorePatterns": [".next"]
 }

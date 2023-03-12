@@ -8,3 +8,11 @@
 node_modules
 dist
 .parcel-cache
+build
+out
+.vercel
+.next
+.env
+.idea
+.vscode
+.DS_Store
