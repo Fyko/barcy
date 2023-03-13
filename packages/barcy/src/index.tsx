@@ -94,6 +94,19 @@ function isInput(element: HTMLElement) {
 	return tagName === "INPUT" || tagName === "TEXTAREA" || editable;
 }
 
+function isValidCharCode(charCode: number) {
+	return typeof charCode !== "undefined"
+}
+
+const state = observable({
+	firstCharTime: 0,
+	lastCharTime: 0,
+	stringWriting: "",
+	callIsScanner: false,
+	testTimer: undefined as number | undefined,
+	scanButtonCounter: 0,
+});
+
 function Barcy(_props: Partial<BarcyProps>) {
 	// merge props with default props
 	const {
@@ -113,15 +126,6 @@ function Barcy(_props: Partial<BarcyProps>) {
 		timeBeforeScanTest,
 	} = { ...defaultProps, ..._props } as BarcyProps;
 
-	const state = observable({
-		firstCharTime: 0,
-		lastCharTime: 0,
-		stringWriting: "",
-		callIsScanner: false,
-		testTimer: undefined as number | undefined,
-		scanButtonCounter: 0,
-	});
-
 	useEffect(() => {
 		const initScannerDetection = () => {
 			state.firstCharTime.set(0);
@@ -131,8 +135,8 @@ function Barcy(_props: Partial<BarcyProps>) {
 
 		const scannerDetectionTest = (str?: string) => {
 			if (str) {
-				state.stringWriting.set(str);
 				state.firstCharTime.set(0);
+				state.stringWriting.set(str);
 				state.lastCharTime.set(0);
 			}
 
@@ -168,7 +172,7 @@ function Barcy(_props: Partial<BarcyProps>) {
 			}
 
 			if (scanButtonKeyCode && event.charCode === scanButtonKeyCode) {
-				state.scanButtonCounter.set(state.scanButtonCounter.get() + 1);
+				state.scanButtonCounter.set((prevCount) => prevCount + 1);
 				event.preventDefault();
 				event.stopImmediatePropagation();
 			}
@@ -187,8 +191,8 @@ function Barcy(_props: Partial<BarcyProps>) {
 				event.stopImmediatePropagation();
 				state.callIsScanner.set(false);
 			} else {
-				if (typeof event.charCode !== "undefined") {
-					state.stringWriting.set(`${state.stringWriting.get()}${String.fromCodePoint(event.charCode)}`);
+				if (isValidCharCode(event.charCode)) {
+					state.stringWriting.set((prevStringWriting) => `${prevStringWriting}${String.fromCodePoint(event.charCode)}`);
 				}
 
 				state.callIsScanner.set(false);
@@ -228,7 +232,6 @@ function Barcy(_props: Partial<BarcyProps>) {
 		startChar,
 		stopPropagation,
 		timeBeforeScanTest,
-		state
 	]);
 
 	return null;
